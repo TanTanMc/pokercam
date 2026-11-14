@@ -1,0 +1,65 @@
+{
+ "chip_set": 2,
+ "seat_radius_mm": 300,
+ "board_radius_mm": 300,
+ "pot_radius_mm": 230,
+ "chip_diameter_mm": 39,
+ "card_marker_mm": 40,
+ "chip_tracking": true,
+ "chips": [
+  {
+   "name": "white",
+   "value": 1,
+   "rgb": [
+    165,
+    164,
+    162
+   ]
+  },
+  {
+   "name": "beige",
+   "value": 5,
+   "rgb": [
+    162,
+    124,
+    89
+   ]
+  },
+  {
+   "name": "pink",
+   "value": 25,
+   "rgb": [
+    168,
+    118,
+    127
+   ]
+  },
+  {
+   "name": "blue",
+   "value": 100,
+   "rgb": [
+    43,
+    54,
+    99
+   ]
+  },
+  {
+   "name": "magenta",
+   "value": 500,
+   "rgb": [
+    75,
+    48,
+    94
+   ]
+  },
+  {
+   "name": "green",
+   "value": 1000,
+   "rgb": [
+    30,
+    62,
+    54
+   ]
+  }
+ ]
+}

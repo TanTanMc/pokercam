@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0e1512">
+<title>PokerCam</title>
+<style>
+:root{--bg:#0e1512;--panel:#17211c;--panel2:#1f2c26;--line:#2b3a33;--text:#eef3ef;--dim:#93a39a;
+  --accent:#3ddc84;--gold:#f2c14e;--red:#ff6b6b;--felt:#1d5a3c}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%}
+body{padding:0 0 calc(76px + env(safe-area-inset-bottom))}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 8px}
+h1{font-size:19px;margin:0;letter-spacing:.3px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);margin:20px 16px 8px;font-weight:600}
+.pill{font-size:12px;padding:4px 10px;border-radius:99px;background:var(--panel2);color:var(--dim);white-space:nowrap}
+.pill.ok{color:var(--accent)}.pill.bad{color:var(--red)}
+main{max-width:640px;margin:0 auto}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin:0 16px 12px;padding:14px}
+.felt{background:radial-gradient(ellipse at 50% 30%,#27704c,var(--felt) 70%);border-color:#2c7a53}
+.row{display:flex;align-items:center;gap:10px}
+.between{justify-content:space-between}
+.street{font-size:13px;text-transform:uppercase;letter-spacing:1.5px;opacity:.85}
+.pot{font-weight:700;color:var(--gold)}
+.cards{display:flex;gap:6px;flex-wrap:wrap}
+.card{background:#fff;color:#111;border-radius:6px;min-width:38px;padding:7px 4px;text-align:center;
+  font-weight:700;font-size:17px;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.card.red{color:#d22}
+.card.sm{min-width:30px;padding:4px 3px;font-size:14px}
+.card.ghost{background:rgba(255,255,255,.1);color:transparent;box-shadow:none}
+.board{margin:12px 0 4px;justify-content:center}
+.board .card{min-width:46px;padding:11px 4px;font-size:20px}
+.leader{text-align:center;margin-top:10px;font-weight:600}
+.player{padding:12px 0;border-top:1px solid var(--line)}
+.player:first-child{border-top:0;padding-top:2px}
+.player.folded{opacity:.45}
+.pname{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tag{font-size:11px;padding:2px 7px;border-radius:99px;background:var(--panel2);color:var(--dim);white-space:nowrap}
+.tag.win{background:var(--accent);color:#04210f;font-weight:700}
+.tag.d{background:#fff;color:#111;font-weight:700}
+.sub{font-size:13px;color:var(--dim)}
+.bar{height:6px;border-radius:3px;background:var(--panel2);margin-top:8px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);transition:width .4s}
+button{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:10px;
+  padding:10px 14px;min-height:44px;cursor:pointer}
+button:active{background:var(--line)}
+button.small{padding:6px 10px;min-height:36px;font-size:13px}
+button.danger{color:var(--red)}
+button.primary{background:var(--accent);color:#04210f;border-color:var(--accent);font-weight:600}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.empty{text-align:center;color:var(--dim);padding:18px 6px}
+.statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.stat{background:var(--panel2);border-radius:10px;padding:8px 4px;text-align:center}
+.stat b{display:block;font-size:18px;font-variant-numeric:tabular-nums}
+.stat span{font-size:10.5px;color:var(--dim);line-height:1.2;display:block}
+.style{color:var(--gold);font-size:13px;margin-top:2px}
+input[type=text],input[type=number]{font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line);
+  border-radius:8px;padding:9px 10px;min-height:44px;width:100%;min-width:0}
+.swatch{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);flex:none}
+.check{display:flex;gap:8px;align-items:flex-start;padding:5px 0;font-size:14px}
+.check i{font-style:normal;width:18px;flex:none}
+img.preview{width:100%;border-radius:10px;display:block;background:#000;min-height:120px}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:rgba(14,21,18,.96);
+  border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);backdrop-filter:blur(8px)}
+nav button{flex:1;border:0;border-radius:0;background:none;color:var(--dim);padding:16px 0;font-weight:600}
+nav button.on{color:var(--accent)}
+.hidden{display:none}
+#toast{position:fixed;left:16px;right:16px;bottom:calc(86px + env(safe-area-inset-bottom));background:#000;
+  border:1px solid var(--line);padding:12px 14px;border-radius:12px;text-align:center;opacity:0;
+  pointer-events:none;transition:opacity .25s}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+<main>
+<header><h1>♠ PokerCam</h1><span id="cam" class="pill">connecting…</span></header>
+
+<section id="tab-live">
+  <div id="live"></div>
+  <h2>Last hand</h2>
+  <div id="last"></div>
+</section>
+
+<section id="tab-stats" class="hidden">
+  <h2 id="stats-title">Players</h2>
+  <div id="stats"></div>
+</section>
+
+<section id="tab-setup" class="hidden">
+  <h2>Camera view</h2>
+  <div class="panel"><img id="preview" class="preview" alt="Camera view with detected markers">
+    <div id="checks" style="margin-top:10px"></div></div>
+  <h2>Your deck</h2>
+  <div class="panel" id="deck"></div>
+  <h2>Player names</h2>
+  <div class="panel" id="names"></div>
+  <h2>Chips (pot estimate)</h2>
+  <div class="panel" id="chips"></div>
+  <h2>Data</h2>
+  <div class="panel"><button class="danger" id="reset">Reset all stats</button>
+    <div class="sub" style="margin-top:8px">A backup file is kept on the computer.</div></div>
+</section>
+</main>
+
+<div id="toast"></div>
+<nav>
+  <button data-tab="live" class="on">Live</button>
+  <button data-tab="stats">Stats</button>
+  <button data-tab="setup">Setup</button>
+</nav>
+
+<script>
+const $ = id => document.getElementById(id);
+let tab = 'live', state = null, editing = false;
+
+function el(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const k in (attrs || {})) {
+    if (k === 'class') e.className = attrs[k];
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), attrs[k]);
+    else if (k === 'style') e.style.cssText = attrs[k];
+    else e.setAttribute(k, attrs[k]);
+  }
+  for (const kid of kids.flat()) if (kid != null && kid !== false) e.append(kid);
+  return e;
+}
+const card = (c, cls) => el('span', {class: 'card ' + (cls || '') + (/[♥♦]/.test(c) ? ' red' : '')}, c);
+const ghost = cls => el('span', {class: 'card ghost ' + (cls || '')}, '0');
+const STREET = {preflop: 'Pre-flop', flop: 'Flop', turn: 'Turn', river: 'River', showdown: 'showdown'};
+
+function toast(msg) {
+  $('toast').textContent = msg; $('toast').classList.add('show');
+  clearTimeout(toast.t); toast.t = setTimeout(() => $('toast').classList.remove('show'), 3200);
+}
+async function act(a) {
+  try {
+    const r = await fetch('/api/action', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(a)});
+    const j = await r.json();
+    if (j.message && j.message !== 'ok') toast(j.message);
+  } catch (e) { toast('Could not reach the computer'); }
+  poll();
+}
+
+function renderLive(s) {
+  const box = $('live'); box.replaceChildren();
+  const L = s.live;
+  if (!L) {
+    box.append(el('div', {class: 'panel felt'}, el('div', {class: 'empty', style: 'color:#d6eadf'},
+      s.waiting_for_clear ? 'Clear the cards off the table to start the next hand.' : 'Waiting for the next deal…',
+      s.pot_now ? el('div', {class: 'pot', style: 'margin-top:6px'}, 'Chips in the middle: ~' + s.pot_now) : null)));
+    return;
+  }
+  const board = el('div', {class: 'cards board'});
+  for (let i = 0; i < 5; i++) board.append(L.board[i] ? card(L.board[i]) : ghost());
+  let lead = null;
+  if (L.leader) lead = el('div', {class: 'leader'},
+    (L.final ? '🏆 ' : '') + L.leader.join(' & ') + (L.final ? (L.leader.length > 1 ? ' split the pot' : ' wins') : (L.leader.length > 1 ? ' are tied' : ' is ahead')));
+  box.append(el('div', {class: 'panel felt'},
+    el('div', {class: 'row between'}, el('span', {class: 'street'}, STREET[L.street]),
+      L.pot != null ? el('span', {class: 'pot'}, 'Pot ~' + L.pot) : null),
+    board, lead));
+
+  const list = el('div', {class: 'panel'});
+  const best = L.leader ? Math.max(...L.players.map(p => p.equity || 0)) : -1;
+  for (const p of L.players) {
+    const cards = el('div', {class: 'cards'});
+    if (p.cards.length) p.cards.forEach(c => cards.append(card(c, 'sm')));
+    else if (!p.folded) { cards.append(ghost('sm'), ghost('sm')); }
+    const right = el('div', {class: 'row'},
+      p.equity != null ? el('b', {style: 'font-variant-numeric:tabular-nums'}, p.equity + '%') : null,
+      p.folded ? el('span', {class: 'tag'}, 'folded ' + STREET[p.folded].toLowerCase()) : null,
+      p.equity != null && p.equity === best ? el('span', {class: 'tag win'}, L.final ? 'WINS' : 'AHEAD') : null);
+    const row = el('div', {class: 'player' + (p.folded ? ' folded' : '')},
+      el('div', {class: 'row between'},
+        el('div', {class: 'row', style: 'min-width:0'}, p.dealer ? el('span', {class: 'tag d'}, 'D') : null,
+          el('span', {class: 'pname'}, p.name)), right),
+      el('div', {class: 'row between', style: 'margin-top:8px'}, cards,
+        el('button', {class: 'small', onclick: () => act({type: 'fold', seat: p.seat})}, p.folded ? 'Un-fold' : 'Fold')),
+      p.hand ? el('div', {class: 'sub', style: 'margin-top:6px'}, p.hand) : null,
+      p.equity != null ? el('div', {class: 'bar'}, el('i', {style: 'width:' + p.equity + '%'})) : null);
+    list.append(row);
+  }
+  if (!L.players.length) list.append(el('div', {class: 'empty'}, 'No players detected yet.'));
+  list.append(el('div', {class: 'btns'}, el('button', {onclick: () => act({type: 'end_hand'})}, 'End hand now')));
+  box.append(list);
+  if (!L.leader) box.append(el('div', {class: 'sub', style: 'margin:0 20px 8px'},
+    'Odds appear as soon as two players turn their cards face up.'));
+}
+
+function renderLast(s) {
+  const box = $('last'); box.replaceChildren();
+  const r = s.last;
+  if (!r) { box.append(el('div', {class: 'panel'}, el('div', {class: 'empty'}, 'No hands finished yet.'))); return; }
+  const p = el('div', {class: 'panel'});
+  p.append(el('div', {class: 'row between'},
+    el('b', {}, r.winners.length ? '🏆 ' + r.winners.join(' & ') : 'Hand #' + r.id + ': who won?'),
+    r.pot ? el('span', {class: 'pot'}, '~' + r.pot) : null));
+  if (r.winners.length) p.append(el('div', {class: 'sub'},
+    r.winning_hand ? r.winning_hand : (r.showdown ? '' : 'Everyone else folded')));
+  if (r.board.length) { const b = el('div', {class: 'cards', style: 'margin:10px 0'}); r.board.forEach(c => b.append(card(c, 'sm'))); p.append(b); }
+  for (const pl of r.players) if (pl.cards.length) {
+    const c = el('div', {class: 'cards'}); pl.cards.forEach(x => c.append(card(x, 'sm')));
+    p.append(el('div', {class: 'row between', style: 'margin-top:6px'},
+      el('span', {class: 'sub'}, pl.name + (pl.hand ? ' · ' + pl.hand : '')), c));
+  }
+  if (!r.winners.length) {
+    const b = el('div', {class: 'btns'});
+    r.players.forEach(pl => b.append(el('button', {class: 'small', onclick: () => act({type: 'set_winner', hand_id: r.id, seat: pl.seat})}, pl.name)));
+    p.append(b);
+  }
+  p.append(el('div', {class: 'btns'}, el('button', {class: 'small danger', onclick: () => {
+    if (confirm('Remove hand #' + r.id + ' from the stats?')) act({type: 'delete_hand', hand_id: r.id}); }}, 'Remove this hand')));
+  box.append(p);
+}
+
+function renderStats(s) {
+  $('stats-title').textContent = 'Players · ' + s.hands_played + ' hands';
+  const box = $('stats'); box.replaceChildren();
+  if (!s.stats.length) { box.append(el('div', {class: 'panel'}, el('div', {class: 'empty'}, 'Stats appear after the first hand.'))); return; }
+  const st = (v, label) => el('div', {class: 'stat'}, el('b', {}, String(v)), el('span', {}, label));
+  for (const p of s.stats) {
+    box.append(el('div', {class: 'panel'},
+      el('div', {class: 'row between'}, el('b', {class: 'pname', style: 'font-size:17px'}, p.name),
+        el('span', {class: 'tag'}, p.hands + (p.hands === 1 ? ' hand' : ' hands'))),
+      el('div', {class: 'style'}, p.style),
+      el('div', {class: 'statgrid'},
+        st(p.win_pct + '%', 'hands won'), st(p.flop_pct + '%', 'saw the flop'),
+        st(p.wtsd_pct + '%', 'went to showdown'), st(p.wsd_pct + '%', 'won at showdown'),
+        st(p.won, 'pots won'), st(p.won_no_showdown, 'won without showing'),
+        st(p.fold_preflop, 'folds pre-flop'), st(p.fold_postflop, 'folds later')),
+      el('div', {class: 'sub', style: 'margin-top:10px'},
+        (p.chips_won ? 'Chips won: ~' + p.chips_won + ' · ' : '') + (p.best ? 'Best hand shown: ' + p.best : 'No hand shown yet'))));
+  }
+}
+
+function renderSetup(s) {
+  const c = s.camera, ck = $('checks'); ck.replaceChildren();
+  const line = (ok, text) => el('div', {class: 'check'}, el('i', {}, ok ? '✅' : '⚠️'), el('span', {}, text));
+  ck.append(line(c.camera_ok, c.camera_ok ? 'Camera working' + (c.demo ? ' (demo table)' : '') + ' · ' + (c.resolution || '') + ' · ' + c.fps + ' looks/s' : (c.message || 'No camera')),
+    line(c.seats_seen.length >= 2, c.seats_seen.length ? 'Seat markers found: ' + c.seats_seen.join(', ') : 'No seat markers found yet'),
+    line(c.board_seen, c.board_seen ? (c.board_from === 'marker' ? 'Printed BOARD marker found' : 'ALL IN button found: it marks the pot and the community cards')
+      : 'ALL IN button not found: lay it flat in the middle of the table'),
+    line(c.dealer_seen, c.dealer_seen ? 'Dealer button found' : 'Dealer button not in view (optional)'),
+    line(c.px_per_mm >= 1.3, c.px_per_mm ? 'Sharpness: ' + c.px_per_mm + ' pixels per mm' + (c.px_per_mm < 1.3 ? ' (too low to read real card faces: move the camera closer or use a higher resolution)' : '') : 'Sharpness: waiting for markers'));
+  renderDeck(s);
+  if (editing) return;   // don't redraw inputs while typing
+  const names = $('names'); names.replaceChildren();
+  if (!s.seats.length) names.append(el('div', {class: 'sub'}, 'Seats show up here once the camera sees their markers.'));
+  for (const seat of s.seats) {
+    const inp = el('input', {type: 'text', maxlength: '20', value: seat.name, 'aria-label': 'Name for seat ' + seat.seat,
+      onfocus: () => { editing = true; inp.select(); },
+      onblur: () => { editing = false; if (inp.value.trim() && inp.value !== seat.name) act({type: 'rename', seat: seat.seat, name: inp.value}); },
+      onkeydown: e => { if (e.key === 'Enter') inp.blur(); }});
+    names.append(el('div', {class: 'row', style: 'margin-bottom:8px'}, el('span', {class: 'tag'}, 'Seat ' + seat.seat), inp));
+  }
+  const chips = $('chips'); chips.replaceChildren();
+  chips.append(el('div', {class: 'row between', style: 'margin-bottom:10px'},
+    el('span', {}, 'Count chips in the pot'),
+    el('button', {class: 'small' + (s.settings.chip_tracking ? ' primary' : ''), onclick: () => act({type: 'setting', key: 'chip_tracking', value: !s.settings.chip_tracking})}, s.settings.chip_tracking ? 'On' : 'Off')));
+  for (const ch of s.settings.chips) {
+    const inp = el('input', {type: 'number', min: '0', inputmode: 'numeric', value: ch.value, 'aria-label': 'Value of ' + ch.name + ' chips',
+      onfocus: () => { editing = true; }, onblur: () => { editing = false; if (+inp.value !== ch.value) act({type: 'chip_value', name: ch.name, value: +inp.value}); },
+      onkeydown: e => { if (e.key === 'Enter') inp.blur(); }});
+    chips.append(el('div', {class: 'row', style: 'margin-bottom:8px'},
+      el('span', {class: 'swatch', style: 'background:rgb(' + ch.rgb.join(',') + ')'}),
+      el('span', {style: 'width:52px;flex:none'}, ch.name), inp,
+      el('button', {class: 'small', style: 'flex:none', onclick: () => act({type: 'calibrate_chip', name: ch.name})}, 'Learn colour')));
+  }
+  chips.append(el('div', {class: 'sub'}, 'To teach a colour: lay one chip of that colour flat and alone next to the ALL IN button, then tap “Learn colour”. The colour is the one on the wedges round the edge of the chip.'));
+}
+
+function renderDeck(s) {
+  const box = $('deck'); box.replaceChildren();
+  const d = s.deck, ln = d.learning;
+  if (!ln) {
+    box.append(
+      el('div', {class: 'check'}, el('i', {}, d.count >= 52 ? '✅' : '⚠️'),
+        el('span', {}, d.count >= 52 ? 'Deck learned: the camera can read all 52 faces.'
+          : d.count ? 'Only ' + d.count + ' of 52 cards learned.' : 'Using an ordinary deck with back stickers? Teach the camera its faces once.')),
+      el('div', {class: 'sub', style: 'margin:6px 0 2px'}, 'You will show the camera each card once, face up, anywhere in view. About 2 minutes (about 4 with back codes). Not needed for the home-printed marker cards.'),
+      el('div', {class: 'btns'}, el('button', {class: d.count >= 52 ? '' : 'primary', onclick: () => {
+        if (d.count === 0 || confirm('Teach the deck again from the start?')) act({type: 'learn_start'}); }},
+        d.count ? 'Teach the deck again' : 'Teach the deck'),
+        el('button', {class: 'small', onclick: () => {
+          if (confirm('For each card you show the face, then turn it over and show the sticker on its back. Use the 52 different stickers (4_unique_back_stickers.pdf). Start?')) act({type: 'learn_start', backs: true}); }},
+        'Teach faces + back codes')),
+      d.backs_registered ? el('div', {class: 'sub', style: 'margin-top:6px'}, d.backs_registered + ' back codes registered: face-down cards are recognised.') : null);
+    return;
+  }
+  box.append(
+    el('div', {class: 'row between'}, el('span', {class: 'sub'}, 'Card ' + (ln.index + 1) + ' of 52'),
+      el('span', {class: 'tag'}, ln.waiting_remove ? 'take the card away' : ln.flip ? 'show the back' : 'waiting for the card')),
+    el('div', {style: 'text-align:center;margin:14px 0'},
+      el('div', {class: 'sub', style: 'margin-bottom:8px'}, ln.waiting_remove ? 'Got it. Next card:' : ln.flip ? 'Now turn it over and show the back, sticker facing the camera:' : 'Lay this card face up anywhere in view of the camera (one at a time):'),
+      el('span', {class: 'card' + (/[♥♦]/.test(ln.next) ? ' red' : ''), style: 'display:inline-block;font-size:34px;padding:22px 16px;min-width:84px'}, ln.next)),
+    ln.waiting_remove ? null : el('div', {class: 'sub', style: 'text-align:center;margin-bottom:8px'}, d.hint || ''),
+    el('div', {class: 'bar'}, el('i', {style: 'width:' + Math.round(100 * ln.index / 52) + '%'})),
+    el('div', {class: 'btns'},
+      ln.flip ? el('button', {class: 'small', onclick: () => act({type: 'learn_skip'})}, 'Skip the back') : null,
+      el('button', {class: 'small', onclick: () => act({type: 'learn_redo'})}, 'Redo previous card'),
+      el('button', {class: 'small danger', onclick: () => act({type: 'learn_stop'})}, 'Stop')));
+}
+
+function render(s) {
+  const c = s.camera, pill = $('cam');
+  pill.textContent = c.camera_ok ? (c.demo ? 'demo' : 'camera on') : 'no camera';
+  pill.className = 'pill ' + (c.camera_ok ? 'ok' : 'bad');
+  if (tab === 'live') { renderLive(s); renderLast(s); }
+  if (tab === 'stats') renderStats(s);
+  if (tab === 'setup') renderSetup(s);
+}
+
+async function poll() {
+  try {
+    const r = await fetch('/api/state', {cache: 'no-store'});
+    state = await r.json(); render(state);
+  } catch (e) { $('cam').textContent = 'offline'; $('cam').className = 'pill bad'; }
+}
+setInterval(poll, 800); poll();
+setInterval(() => { if (tab === 'setup') $('preview').src = '/snapshot.jpg?t=' + Date.now(); }, 1000);
+
+document.querySelectorAll('nav button').forEach(b => b.addEventListener('click', () => {
+  tab = b.dataset.tab;
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
+  for (const t of ['live', 'stats', 'setup']) $('tab-' + t).classList.toggle('hidden', t !== tab);
+  if (state) render(state);
+}));
+$('reset').addEventListener('click', () => { if (confirm('Erase all hands and stats?')) act({type: 'reset_stats'}); });
+</script>
+</body>
+</html>
